@@ -21,8 +21,6 @@ public enum Action
 
 public class MainController : MonoBehaviour
 {
-    //public State currentState;
-
     public State? previousState = null;
     public Action? previousAction = null;
     public float? previousReward = null;
@@ -32,7 +30,7 @@ public class MainController : MonoBehaviour
     private const float DISCOUNTINGFACTOR = 0f;
     private const State FINALSTATE = State.End;
 
-    //For exploration(greed bvs curiostity)
+    //For exploration(greed vs curiosity)
     private const float BestPossibleRewardOptismisticEstimate = 0f;
     private const int MimumumStateActionStateActionPairFrequencies = 1;
 
@@ -52,7 +50,7 @@ public class MainController : MonoBehaviour
             StateActionPairFrequencies[stateActionPair]++;
             StateActionPairQValue[stateActionPair] += LEARNINGRATE *
                 (StateActionPairFrequencies[stateActionPair]) * (previousReward.Value + 
-                DISCOUNTINGFACTOR * MaxStateActionPairQValue(ref currentState) -StateActionPairQValue[stateActionPair]);
+                DISCOUNTINGFACTOR * MaxStateActionPairQValue(ref currentState) - StateActionPairQValue[stateActionPair]);
         }
         previousState = currentState;
         previousAction = ArgMaxActionExploration(ref currentState);
@@ -70,7 +68,7 @@ public class MainController : MonoBehaviour
         }
         return max;
     }
-    //Is this also the Expected value?
+    //Is this also the "Expected" value?
     private Action ArgMaxActionExploration(ref State currentState)
     {
         Action argMaxAction = Action.None;
@@ -87,7 +85,8 @@ public class MainController : MonoBehaviour
         }
         return argMaxAction;
     }
-    //Page 842
+    //Page 842, this function is not well defined apparently
+    //Give the agent the option to have the incentives to explore more?
     private float ExplorationFunction(ref State currentState, Action choice)
     {
         if(StateActionPairFrequencies[(currentState,choice)] < MimumumStateActionStateActionPairFrequencies)
