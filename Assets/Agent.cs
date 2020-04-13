@@ -19,25 +19,31 @@ public enum Action
     Down
 }
 
-public class MainController : MonoBehaviour
+public class Agent : MonoBehaviour
 {
     public State? previousState = null;
     public Action? previousAction = null;
     public float? previousReward = null;
 
     //Between 0 and 1
-    private const float LEARNINGRATE = 0.1f;
-    private const float DISCOUNTINGFACTOR = 0f;
-    private const State FINALSTATE = State.End;
+    public float LEARNINGRATE = 0.1f;
+    public float DISCOUNTINGFACTOR = 0f;
+    public State FINALSTATE = State.End;
 
     //For exploration(greed vs curiosity)
-    private const float BestPossibleRewardOptismisticEstimate = 0f;
-    private const int MimumumStateActionStateActionPairFrequencies = 1;
+    public float EstimatedBestPossibleRewardValue = 0f;
+    public int MimumumStateActionPairFrequencies = 1;
 
     public Dictionary<(State, Action), float> StateActionPairQValue;
     public Dictionary<(State, Action), int> StateActionPairFrequencies;
     public Dictionary<Action, System.Action> ActionDelegatesDictonary;
 
+    public int GridX = 6;
+    public int GridY = 6;
+
+    public int GrizSizeX = 13;
+    public int GrizSizeY = 13;
+    public Dictionary<(int, int), State> StateGrid;
     public Action Q_Learning_Agent(State currentState, float rewardSignal)
     {
         if(currentState == FINALSTATE)
@@ -68,7 +74,7 @@ public class MainController : MonoBehaviour
         }
         return max;
     }
-    //Is this also the "Expected" value?
+
     private Action ArgMaxActionExploration(ref State currentState)
     {
         Action argMaxAction = Action.None;
@@ -85,13 +91,14 @@ public class MainController : MonoBehaviour
         }
         return argMaxAction;
     }
+
     //Page 842, this function is not well defined apparently
     //Give the agent the option to have the incentives to explore more?
     private float ExplorationFunction(ref State currentState, Action choice)
     {
-        if(StateActionPairFrequencies[(currentState,choice)] < MimumumStateActionStateActionPairFrequencies)
+        if(StateActionPairFrequencies[(currentState,choice)] < MimumumStateActionPairFrequencies)
         {
-            return BestPossibleRewardOptismisticEstimate;
+            return EstimatedBestPossibleRewardValue;
         }
         return StateActionPairQValue[(currentState, choice)];
     }
@@ -111,7 +118,7 @@ public class MainController : MonoBehaviour
         ActionDelegatesDictonary[Action.Right] = Right;
         ActionDelegatesDictonary[Action.Up] = Up;
         ActionDelegatesDictonary[Action.Down] = Down;
-        ActionDelegatesDictonary[Action.Left]();
+        ActionDelegatesDictonary[Q_Learning_Agent(State.Start, 1f)]();
     }
 
     private void Update()
@@ -121,21 +128,29 @@ public class MainController : MonoBehaviour
 
     private void Left()
     {
-
+        transform.position -= new Vector3(1f, 0f, 0f);
+        GridX--;
+        ActionDelegatesDictonary[Q_Learning_Agent(StateGrid[(GridX,GridY)], 1f)]();
     }
 
     private void Right()
     {
-
+        transform.position += new Vector3(1f, 0f, 0f);
+        GridX++;
+        ActionDelegatesDictonary[Q_Learning_Agent(StateGrid[(GridX, GridY)], 1f)]();
     }
 
     private void Up()
     {
-
+        transform.position += new Vector3(0f, 0f, 1f);
+        GridY++;
+        ActionDelegatesDictonary[Q_Learning_Agent(StateGrid[(GridX, GridY)], 1f)]();
     }
 
     private void Down()
     {
-
+        transform.position -= new Vector3(0f, 0f, 1f);
+        GridY--;
+        ActionDelegatesDictonary[Q_Learning_Agent(StateGrid[(GridX, GridY)], 1f)]();
     }
 }
