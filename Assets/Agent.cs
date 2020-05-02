@@ -210,6 +210,7 @@ public class Agent : MonoBehaviour
         transform.position = new Vector3(StartState.Item1, 1f, StartState.Item2);
         CurrentGridX = StartState.Item1;
         CurrentGridY = StartState.Item2;
+        Grid.instance.ClearColors();
         UpdateIteration();
         StartCoroutine(WaitThenAction(0.01f, StartState));
     }
@@ -261,6 +262,11 @@ public class Agent : MonoBehaviour
             }
         }
         StateRewardGrid[FinalState] = 500f;
+    }
+
+    private void Update()
+    {
+        Grid.instance.UpdateColor(CurrentGridX, CurrentGridY);
     }
 
     public void StartExploring()
