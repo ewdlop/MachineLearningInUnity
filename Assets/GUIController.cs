@@ -1,21 +1,26 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+[Serializable]
 public class GUIController : MonoBehaviour
 {
-    public Text iterationText;
-    public Text stepText;
+    [SerializeField]
+    private Text _iterationText;
+    [SerializeField]
+    private Text _stepText;
+    public Text IterationText { get => _iterationText; set => _stepText = value; }
+    public Text StepText { get => _stepText; set => _stepText = value; }
 
-    public void UpdateIterationText(int iteration)
+    public void UpdateInterationText(string newText)
     {
-        iterationText.text = string.Format("Iteration: {0}",iteration);
+        IterationText.text = string.Format("Iteration: {0}", newText);
     }
 
-    public void UpdateStepText(int step)
+    public void UpdateStepText(string newText)
     {
-        stepText.text = string.Format("Step: {0}", step);
+        StepText.text = string.Format("Step: {0}", newText);
     }
-
 }

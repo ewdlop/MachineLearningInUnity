@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
 public enum Action
 {
     None,
@@ -17,20 +18,27 @@ public class Agent : MonoBehaviour
     [SerializeField]
     private int _step;
     [SerializeField]
+    private int _iteration;
+    [SerializeField]
     private int _currentGridX;
     [SerializeField]
     private int _currentGridY;
+    [SerializeField]
     private (int,int)? _previousState = null;
+    [SerializeField]
     private Action? _previousAction = null;
     [SerializeField]
     private float? _previousReward = null;
-
+    [SerializeField]
+    private GUIController _gUIController;
     public int Step { get => _step; set => _step = value; }
+    public int Iteration { get => _iteration; set => _iteration = value; }
     public int CurrentGridX { get => _currentGridX; set => _currentGridX = value; }
     public int CurrentGridY { get => _currentGridY; set => _currentGridY = value; }
     public (int, int)? PreviousState { get => _previousState; set => _previousState = value; }
     public Action? PreviousAction { get => _previousAction; set => _previousAction = value; }
     public float? PreviousReward { get => _previousReward; set => _previousReward = value; }
+    public GUIController GUIController { get => _gUIController; set => _gUIController = value; }
 
     //Between 0 and 1
     [Range(0f,1f)]
@@ -54,7 +62,6 @@ public class Agent : MonoBehaviour
     public Dictionary<((int,int), Action),int> StateActionPairFrequencies;
     public Dictionary<(int, int), float> StateRewardGrid;
     public Dictionary<Action, System.Action> ActionDelegatesDictonary;
-    public GUIController GUIController;
 
     #region  Q_Learning_Agent
     private Action Q_Learning_Agent((int,int) currentState, float rewardSignal)
@@ -248,7 +255,6 @@ public class Agent : MonoBehaviour
             }
         }
         StateRewardGrid[FinalState] = 500f;
-
     }
 
     public void StartExploring()
@@ -259,7 +265,7 @@ public class Agent : MonoBehaviour
     private void UpdateStep()
     {
         Step++;
-
+        GUIController?.UpdateStepText(Step.ToString());
     }
     #endregion
 }

@@ -170,7 +170,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: New Text
+  m_Text: 'Step:'
 --- !u!222 &77065978
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -233,6 +233,7 @@ MonoBehaviour:
   _step: 0
   _currentGridX: 0
   _currentGridY: 0
+  _gUIController: {fileID: 1881376384}
   LearningRate: 0.5
   DiscountingFactor: 0.5
   StartX: 5
@@ -563,7 +564,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: New Text
+  m_Text: 'Iteration:
+
+'
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -1157,8 +1160,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7dbe6505ad5e284b9f319ef306a45b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  iterationText: {fileID: 675458360}
-  stepText: {fileID: 77065977}
+  _iterationText: {fileID: 675458360}
+  _stepText: {fileID: 77065977}
 --- !u!4 &1881376385
 Transform:
   m_ObjectHideFlags: 0
