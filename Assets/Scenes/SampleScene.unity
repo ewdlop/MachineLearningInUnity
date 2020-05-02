@@ -231,16 +231,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _step: 0
-  _learningRate: 0
-  _discountingFactor: 0
-  GridX: 0
-  GridY: 0
-  STARTX: 8
-  STARTY: 5
+  _currentGridX: 0
+  _currentGridY: 0
+  LearningRate: 0.5
+  DiscountingFactor: 0.5
+  StartX: 5
+  StartY: 9
   GrizSizeX: 15
   GrizSizeY: 15
-  EstimatedBestPossibleRewardValue: 0
   MimumumStateActionPairFrequencies: 0
+  EstimatedBestPossibleRewardValue: 0
 --- !u!136 &130691566
 CapsuleCollider:
   m_ObjectHideFlags: 0
