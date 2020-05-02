@@ -41,7 +41,7 @@ public class Agent : MonoBehaviour
     public GUIController GUIController { get => _gUIController; set => _gUIController = value; }
 
     //Between 0 and 1
-    [Range(0f,1f)]
+    [Range(0f, 1f)]
     public float LearningRate;
     [Range(0f, 1f)]
     public float DiscountingFactor;
@@ -199,12 +199,18 @@ public class Agent : MonoBehaviour
 
     private void None()
     {
+        ResetAgentToStart();
+    }
+
+    private void ResetAgentToStart()
+    {
         PreviousAction = null;
         PreviousReward = null;
         PreviousState = null;
         transform.position = new Vector3(StartState.Item1, 1f, StartState.Item2);
         CurrentGridX = StartState.Item1;
         CurrentGridY = StartState.Item2;
+        UpdateIteration();
         StartCoroutine(WaitThenAction(0.01f, StartState));
     }
 
@@ -259,6 +265,7 @@ public class Agent : MonoBehaviour
 
     public void StartExploring()
     {
+        UpdateIteration();
         StartCoroutine(WaitThenAction(0.1f, StartState));
     }
 
@@ -266,6 +273,12 @@ public class Agent : MonoBehaviour
     {
         Step++;
         GUIController?.UpdateStepText(Step.ToString());
+    }
+
+    private void UpdateIteration()
+    {
+        Iteration++;
+        GUIController?.UpdateInterationText(Iteration.ToString());
     }
     #endregion
 }

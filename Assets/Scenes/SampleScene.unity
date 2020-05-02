@@ -231,6 +231,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _step: 0
+  _iteration: 0
   _currentGridX: 0
   _currentGridY: 0
   _gUIController: {fileID: 1881376384}
