@@ -11,17 +11,20 @@ public enum Action
     Up,
     Down
 }
-
+[Serializable]
 public class Agent : MonoBehaviour
 {
-    public int count = 0;
+    [SerializeField]
+    private int Step = 0;
 
     public (int,int)? previousState = null;
     public Action? previousAction = null;
     public float? previousReward = null;
 
     //Between 0 and 1
+    [Range(0f,1f)]
     public float LEARNINGRATE;
+    [Range(0f, 1f)]
     public float DISCOUNTINGFACTOR;
     public (int,int) START;
     public (int,int) FINALSTATE = (7,9);
@@ -46,7 +49,7 @@ public class Agent : MonoBehaviour
 
     private Action Q_Learning_Agent((int,int) currentState, float rewardSignal)
     {
-        count++;
+        Step++;
         if (previousState == FINALSTATE)
         {
             StateActionPairQValue[(previousState.Value, Action.None)] = rewardSignal;
@@ -65,7 +68,7 @@ public class Agent : MonoBehaviour
         //    return Action.None;
         //}
         //else
-            previousAction = ArgMaxActionExploration(ref currentState);
+        previousAction = ArgMaxActionExploration(ref currentState);
         previousReward = rewardSignal;
         return previousAction.Value;
     }
@@ -183,7 +186,7 @@ public class Agent : MonoBehaviour
                 }
                 if (i == 0 || j == 0 || i == GrizSizeX - 1 || j == GrizSizeY - 1)
                 {
-                    StateRewardGrid[(i, j)] = -1f;
+                    StateRewardGrid[(i, j)] = -10f;
                 }
                 else
                 {
@@ -192,7 +195,7 @@ public class Agent : MonoBehaviour
             }
         }
         StateRewardGrid[FINALSTATE] = 500f;
-        StartCoroutine(WaiThenAction(0.1f, START));
+
     }
 
     private void Update()
@@ -210,7 +213,7 @@ public class Agent : MonoBehaviour
         //    GridY = START.Item2;
         //    transform.position = new Vector3(START.Item1, 1f, START.Item2);
         //}
-        StartCoroutine(WaiThenAction(0.1f, (GridX, GridY)));
+        StartCoroutine(WaitThenAction(0.01f, (GridX, GridY)));
     }
 
     private void Right()
@@ -223,7 +226,7 @@ public class Agent : MonoBehaviour
         //    GridY = START.Item2;
         //    transform.position = new Vector3(START.Item1, 1f, START.Item2);
         //}
-        StartCoroutine(WaiThenAction(0.1f, (GridX, GridY)));
+        StartCoroutine(WaitThenAction(0.01f, (GridX, GridY)));
     }
 
     private void Up()
@@ -236,7 +239,7 @@ public class Agent : MonoBehaviour
         //    GridY = START.Item2;
         //    transform.position = new Vector3(START.Item1, 1f, START.Item2);
         //}
-        StartCoroutine(WaiThenAction(0.1f, (GridX, GridY)));
+        StartCoroutine(WaitThenAction(0.01f, (GridX, GridY)));
     }
 
     private void Down()
@@ -249,7 +252,7 @@ public class Agent : MonoBehaviour
         //    GridY = START.Item2;
         //    transform.position = new Vector3(START.Item1, 1f, START.Item2);
         //}
-        StartCoroutine(WaiThenAction(0.1f, (GridX, GridY)));
+        StartCoroutine(WaitThenAction(0.01f, (GridX, GridY)));
     }
 
     private void None()
@@ -260,12 +263,19 @@ public class Agent : MonoBehaviour
         transform.position = new Vector3(START.Item1, 1f, START.Item2);
         GridX = START.Item1;
         GridY = START.Item2;
-        StartCoroutine(WaiThenAction(0.1f, START));
+        StartCoroutine(WaitThenAction(0.01f, START));
     }
 
-    private IEnumerator WaiThenAction(float waitTime, (int,int) GridCoordinate)
+    private IEnumerator WaitThenAction(float waitTime, (int,int) GridCoordinate)
     {
         yield return new WaitForSeconds(waitTime);
         ActionDelegatesDictonary[Q_Learning_Agent(GridCoordinate, StateRewardGrid[GridCoordinate])]();
+    }
+
+    /**==============================================================================================**/
+
+    public void StartExploring()
+    {
+        StartCoroutine(WaitThenAction(0.1f, START));
     }
 }
