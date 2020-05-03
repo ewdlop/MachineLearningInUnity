@@ -31,6 +31,12 @@ public class Agent : MonoBehaviour
     private float? _previousReward = null;
     [SerializeField]
     private GUIController _gUIController;
+    [SerializeField]
+    [Range(0f, 1f)]
+    private float learningRate;
+    [SerializeField]
+    [Range(0f, 1f)]
+    private float discountingFactor;
     public int Step { get => _step; set => _step = value; }
     public int Iteration { get => _iteration; set => _iteration = value; }
     public int CurrentGridX { get => _currentGridX; set => _currentGridX = value; }
@@ -39,12 +45,9 @@ public class Agent : MonoBehaviour
     public Action? PreviousAction { get => _previousAction; set => _previousAction = value; }
     public float? PreviousReward { get => _previousReward; set => _previousReward = value; }
     public GUIController GUIController { get => _gUIController; set => _gUIController = value; }
+    public float LearningRate { get => learningRate; set => learningRate = value; }
+    public float DiscountingFactor { get => discountingFactor; set => discountingFactor = value; }
 
-    //Between 0 and 1
-    [Range(0f, 1f)]
-    public float LearningRate;
-    [Range(0f, 1f)]
-    public float DiscountingFactor;
     public (int,int) StartState;
     public (int,int) FinalState = (7,9);
     

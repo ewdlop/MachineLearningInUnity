@@ -12,12 +12,14 @@ public class GUIController : MonoBehaviour
     private Text _iterationText;
     [SerializeField]
     private Text _stepText;
+    private Text _LearningRateText;
+    private Text _DiscountingFactorText;
     public Text IterationText { get => _iterationText; set => _stepText = value; }
     public Text StepText { get => _stepText; set => _stepText = value; }
 
     public void UpdateInterationText(string newText)
     {
-        IterationText.text = string.Format("Iteration: {0}", newText);
+        IterationText.text = string.Format("Iterion: {0}", newText);
     }
 
     public void UpdateStepText(string newText)
@@ -28,5 +30,9 @@ public class GUIController : MonoBehaviour
     public void ResetScene()
     {       
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+    public void UpdateLearningRateValue(float newValue)
+    {
+        StepText.text = string.Format("Step: {0}", newValue);
     }
 }
