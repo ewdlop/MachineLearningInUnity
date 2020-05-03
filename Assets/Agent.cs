@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using UnityEngine;
 
 [Serializable]
@@ -101,7 +103,18 @@ public class Agent : MonoBehaviour
     private float MaxStateActionPairQValue(ref (int, int) currentState)
     {
         float max = float.NegativeInfinity;
+
+        Action[] actions = new Action[5];
+        int i = 0;
         foreach (Action action in Enum.GetValues(typeof(Action)))
+        {
+            actions[i] = action;
+            i++;
+        }
+        System.Random random = new System.Random();
+        actions = actions.OrderBy(x => random.Next()).ToArray();
+
+        foreach (Action action in actions)
         {
             if (currentState == FinalState)
                 return StateActionPairQValue[(currentState, Action.None)];
@@ -134,8 +147,18 @@ public class Agent : MonoBehaviour
     {
         Action argMaxAction = Action.None;
         float max = float.NegativeInfinity;
-        
+
+        Action[] actions = new Action[5];
+        int i = 0;
         foreach (Action action in Enum.GetValues(typeof(Action)))
+        {
+            actions[i] = action;
+            i++;
+        }
+        System.Random random = new System.Random();
+        actions = actions.OrderBy(x => random.Next()).ToArray();
+
+        foreach (Action action in actions)
         {
             if (currentState == FinalState)
                 return Action.None;
@@ -272,11 +295,11 @@ public class Agent : MonoBehaviour
                 }
                 if (i == 0 || j == 0 || i == GrizSizeX - 1 || j == GrizSizeY - 1)
                 {
-                    StateRewardGrid[(i, j)] = -10f;
+                    StateRewardGrid[(i, j)] = 5f;
                 }
                 else
                 {
-                    StateRewardGrid[(i, j)] = 1f;
+                    StateRewardGrid[(i, j)] = -10f;
                 }
             }
         }
