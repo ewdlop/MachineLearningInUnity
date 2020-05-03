@@ -11,7 +11,7 @@ public class Grid : MonoBehaviour
         if (instance == null)
             instance = this;
 
-        goalPosition = (Random.Range(0, rows), Random.Range(0, columns));
+        goalPosition = (Random.Range(1, rows-1), Random.Range(1, columns-1));
         Instantiate(goalCube, new Vector3(goalPosition.Item1, 0.5f, goalPosition.Item2), Quaternion.identity);
     } 
     #endregion

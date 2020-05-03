@@ -7,14 +7,15 @@ using UnityEngine;
 public enum Action
 {
     None,
-    Left,
     Right,
-    Up,
-    Down
+    Down,
+    Left,
+    Up
 }
 [Serializable]
 public class Agent : MonoBehaviour
 {
+    #region Fields
     [SerializeField]
     private int _step;
     [SerializeField]
@@ -33,10 +34,17 @@ public class Agent : MonoBehaviour
     private GUIController _gUIController;
     [SerializeField]
     [Range(0f, 1f)]
-    private float learningRate;
+    private float _learningRate;
     [SerializeField]
     [Range(0f, 1f)]
-    private float discountingFactor;
+    private float _discountingFactor;
+    //For exploration(shorten gain vs curiosity)
+    [SerializeField]
+    private int _mimumumStateActionPairFrequencies;
+    [SerializeField]
+    private float _estimatedBestPossibleRewardValue;
+    [SerializeField]
+    private Coroutine _waitThenActionCoroutine;
     public int Step { get => _step; set => _step = value; }
     public int Iteration { get => _iteration; set => _iteration = value; }
     public int CurrentGridX { get => _currentGridX; set => _currentGridX = value; }
@@ -45,8 +53,11 @@ public class Agent : MonoBehaviour
     public Action? PreviousAction { get => _previousAction; set => _previousAction = value; }
     public float? PreviousReward { get => _previousReward; set => _previousReward = value; }
     public GUIController GUIController { get => _gUIController; set => _gUIController = value; }
-    public float LearningRate { get => learningRate; set => learningRate = value; }
-    public float DiscountingFactor { get => discountingFactor; set => discountingFactor = value; }
+    public float LearningRate { get => _learningRate; set => _learningRate = value; }
+    public float DiscountingFactor { get => _discountingFactor; set => _discountingFactor = value; }
+    public int MimumumStateActionPairFrequencies { get => _mimumumStateActionPairFrequencies; set => _mimumumStateActionPairFrequencies = value; }
+    public float EstimatedBestPossibleRewardValue { get => _estimatedBestPossibleRewardValue; set => _estimatedBestPossibleRewardValue = value; }
+    public Coroutine WaitThenActionCoroutine { get => _waitThenActionCoroutine; set => _waitThenActionCoroutine = value; }
 
     public (int,int) StartState;
     public (int,int) FinalState = (7,9);
@@ -56,15 +67,12 @@ public class Agent : MonoBehaviour
     
     public int GrizSizeX;
     public int GrizSizeY;
-    
-    //For exploration(shorten gain vs curiosity)
-    public int MimumumStateActionPairFrequencies;
-    public float EstimatedBestPossibleRewardValue;
 
     public Dictionary<((int,int),Action),float> StateActionPairQValue;
     public Dictionary<((int,int), Action),int> StateActionPairFrequencies;
     public Dictionary<(int, int), float> StateRewardGrid;
     public Dictionary<Action, System.Action> ActionDelegatesDictonary;
+    #endregion
 
     #region  Q_Learning_Agent
     private Action Q_Learning_Agent((int,int) currentState, float rewardSignal)
@@ -176,33 +184,35 @@ public class Agent : MonoBehaviour
     {
         transform.position -= new Vector3(1f, 0f, 0f);
         CurrentGridX--;
-        StartCoroutine(WaitThenAction(0.01f, (CurrentGridX, CurrentGridY)));
+        WaitThenActionCoroutine = StartCoroutine(WaitThenAction(0.01f, (CurrentGridX, CurrentGridY)));
     }
 
     private void Right()
     {
         transform.position += new Vector3(1f, 0f, 0f);
         CurrentGridX++;
-        StartCoroutine(WaitThenAction(0.01f, (CurrentGridX, CurrentGridY)));
+        WaitThenActionCoroutine = StartCoroutine(WaitThenAction(0.01f, (CurrentGridX, CurrentGridY)));
     }
 
     private void Up()
     {
         transform.position += new Vector3(0f, 0f, 1f);
         CurrentGridY++;
-        StartCoroutine(WaitThenAction(0.01f, (CurrentGridX, CurrentGridY)));
+        WaitThenActionCoroutine = StartCoroutine(WaitThenAction(0.01f, (CurrentGridX, CurrentGridY)));
     }
 
     private void Down()
     {
         transform.position -= new Vector3(0f, 0f, 1f);
         CurrentGridY--;
-        StartCoroutine(WaitThenAction(0.01f, (CurrentGridX, CurrentGridY)));
+        WaitThenActionCoroutine = StartCoroutine(WaitThenAction(0.01f, (CurrentGridX, CurrentGridY)));
     }
 
     private void None()
     {
         ResetAgentToStart();
+        UpdateIteration();
+        WaitThenActionCoroutine = StartCoroutine(WaitThenAction(0.01f, StartState));
     }
 
     private void ResetAgentToStart()
@@ -214,8 +224,6 @@ public class Agent : MonoBehaviour
         CurrentGridX = StartState.Item1;
         CurrentGridY = StartState.Item2;
         Grid.instance.ClearColors();
-        UpdateIteration();
-        StartCoroutine(WaitThenAction(0.01f, StartState));
     }
 
     private IEnumerator WaitThenAction(float waitTime, (int,int) GridCoordinate)
@@ -229,23 +237,29 @@ public class Agent : MonoBehaviour
     private void Start()
     {
         FinalState = Grid.instance.goalPosition;
-
-        transform.position = new Vector3(StartX, 0f, StartY);
-
-        StartState = (StartX, StartY);
-
-        CurrentGridX = StartState.Item1;
-        CurrentGridY = StartState.Item2;
-
         ActionDelegatesDictonary = new Dictionary<Action, System.Action>();
-        StateActionPairQValue = new Dictionary<((int, int), Action), float>();
-        StateActionPairFrequencies = new Dictionary<((int, int), Action), int>();
-        StateRewardGrid = new Dictionary<(int, int), float>();
         ActionDelegatesDictonary[Action.Left] = Left;
         ActionDelegatesDictonary[Action.Right] = Right;
         ActionDelegatesDictonary[Action.Up] = Up;
         ActionDelegatesDictonary[Action.Down] = Down;
         ActionDelegatesDictonary[Action.None] = None;
+        Initialized();
+    }
+
+    private void Initialized()
+    {
+        PreviousAction = null;
+        PreviousReward = null;
+        PreviousState = null;
+        Step = 0;
+        Iteration = 0;
+        transform.position = new Vector3(StartX, 1f, StartY);
+        StartState = (StartX, StartY);
+        CurrentGridX = StartState.Item1;
+        CurrentGridY = StartState.Item2;
+        StateActionPairQValue = new Dictionary<((int, int), Action), float>();
+        StateActionPairFrequencies = new Dictionary<((int, int), Action), int>();
+        StateRewardGrid = new Dictionary<(int, int), float>();
 
         for (int i = 0; i < GrizSizeX; i++)
         {
@@ -262,7 +276,7 @@ public class Agent : MonoBehaviour
                 }
                 else
                 {
-                    StateRewardGrid[(i, j)] = 0f;
+                    StateRewardGrid[(i, j)] = 1f;
                 }
             }
         }
@@ -277,7 +291,13 @@ public class Agent : MonoBehaviour
     public void StartExploring()
     {
         UpdateIteration();
-        StartCoroutine(WaitThenAction(0.1f, StartState));
+        WaitThenActionCoroutine = StartCoroutine(WaitThenAction(0.1f, StartState));
+    }
+
+    public void Stop()
+    {
+        Initialized();
+        StopCoroutine(WaitThenActionCoroutine);
     }
 
     private void UpdateStep()
