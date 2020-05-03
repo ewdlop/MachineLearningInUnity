@@ -10,16 +10,19 @@ public class Grid : MonoBehaviour
     {
         if (instance == null)
             instance = this;
+
+        goalPosition = (Random.Range(0, rows), Random.Range(0, columns));
+        Instantiate(goalCube, new Vector3(goalPosition.Item1, 0.5f, goalPosition.Item2), Quaternion.identity);
     } 
     #endregion
 
     public GameObject floorCube;
+    public GameObject goalCube;
     public int rows = 15;
     public int columns = 15;
     private GameObject[,] grid;
 
-    //public List<GameObject> prevActions;
-    //public List<GameObject> currActions;
+    public (int, int) goalPosition;
 
     private void OnDrawGizmosSelected()
     {

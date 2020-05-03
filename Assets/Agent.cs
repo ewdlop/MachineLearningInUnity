@@ -225,6 +225,8 @@ public class Agent : MonoBehaviour
     #region Unity
     private void Start()
     {
+        FinalState = Grid.instance.goalPosition;
+
         transform.position = new Vector3(StartX, 0f, StartY);
 
         StartState = (StartX, StartY);

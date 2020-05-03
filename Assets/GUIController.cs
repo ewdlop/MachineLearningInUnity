@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 [Serializable]
 public class GUIController : MonoBehaviour
@@ -22,5 +23,10 @@ public class GUIController : MonoBehaviour
     public void UpdateStepText(string newText)
     {
         StepText.text = string.Format("Step: {0}", newText);
+    }
+
+    public void ResetScene()
+    {       
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
