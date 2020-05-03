@@ -48,6 +48,8 @@ public class Agent : MonoBehaviour
     private float _estimatedBestPossibleRewardValue;
     [SerializeField]
     private Coroutine _waitThenActionCoroutine;
+    [SerializeField]
+    private bool _isPause;
     public int Step { get => _step; set => _step = value; }
     public int Iteration { get => _iteration; set => _iteration = value; }
     public int CurrentGridX { get => _currentGridX; set => _currentGridX = value; }
@@ -61,6 +63,7 @@ public class Agent : MonoBehaviour
     public int MimumumStateActionPairFrequencies { get => _mimumumStateActionPairFrequencies; set => _mimumumStateActionPairFrequencies = value; }
     public float EstimatedBestPossibleRewardValue { get => _estimatedBestPossibleRewardValue; set => _estimatedBestPossibleRewardValue = value; }
     public Coroutine WaitThenActionCoroutine { get => _waitThenActionCoroutine; set => _waitThenActionCoroutine = value; }
+    public bool IsPause { get => _isPause; set => _isPause = value; }
 
     public (int,int) StartState;
     public (int,int) FinalState = (7,9);
@@ -92,10 +95,11 @@ public class Agent : MonoBehaviour
         {
             Debug.Log(string.Format("{0},{1},{2}", PreviousState.Value, PreviousAction.Value, PreviousReward.Value));
             ((int, int), Action) stateActionPair = (PreviousState.Value, PreviousAction.Value);
-            StateActionPairFrequencies[stateActionPair]++;
-            StateActionPairQValue[stateActionPair] += LearningRate *
-                (StateActionPairFrequencies[stateActionPair]) * (PreviousReward.Value + 
-                DiscountingFactor * MaxStateActionPairQValue(ref currentState) - StateActionPairQValue[stateActionPair]);
+            //StateActionPairFrequencies[stateActionPair]++;
+            //StateActionPairQValue[stateActionPair] += LearningRate * (StateActionPairFrequencies[stateActionPair]) * (PreviousReward.Value + 
+            //    DiscountingFactor * MaxStateActionPairQValue(ref currentState) - StateActionPairQValue[stateActionPair]);
+
+            StateActionPairQValue[stateActionPair] += LearningRate * (PreviousReward.Value + (DiscountingFactor * MaxStateActionPairQValue(ref currentState)) - StateActionPairQValue[stateActionPair]);
         }
         PreviousState = currentState;
         PreviousAction = ArgMaxActionExploration(ref currentState);
@@ -111,21 +115,21 @@ public class Agent : MonoBehaviour
 
         float max = float.NegativeInfinity;
 
-        Action[] actions = new Action[5];
+        Action[] actions = new Action[4];
         int i = 0;
         foreach (Action action in Enum.GetValues(typeof(Action)))
         {
-            actions[i] = action;
-            i++;
+            if(action != Action.None)
+            {
+                actions[i] = action;
+                i++;
+            }
         }
         System.Random random = new System.Random();
-        actions = actions.OrderBy(x => random.Next()).ToArray();
+        actions = actions.OrderBy(_ => random.Next()).ToArray();
 
         foreach (Action action in actions)
         {
-            if (action == Action.None)
-                continue;
-                
             if (CurrentGridX - 1 < 0 && action == Action.Left)
             {
                 continue;
@@ -147,12 +151,68 @@ public class Agent : MonoBehaviour
                 max = Mathf.Max(StateActionPairQValue[(currentState, action)], max);
             }
         }
-        Debug.Log(max);
+        Debug.Log(string.Format("Q-value: {0}",max));
         return max;
 
     }
+    #region old
+    //private Action ArgMaxActionExploration(ref (int, int) currentState)
+    //{
+    //    if (currentState == FinalState)
+    //        return Action.None;
 
-    private Action ArgMaxActionExploration(ref (int, int) currentState)
+    //    Action argMaxAction = Action.None;
+    //    float max = float.NegativeInfinity;
+
+    //    Action[] actions = new Action[5];
+    //    int i = 0;
+    //    foreach (Action action in Enum.GetValues(typeof(Action)))
+    //    {
+            //if(action != Action.None)
+            //{
+            //    actions[i] = action;
+            //    i++;
+            //}
+//    }
+//    System.Random random = new System.Random();
+//    actions = actions.OrderBy(x => random.Next()).ToArray();
+
+//    foreach (Action action in actions)
+//    {
+//        if (action == Action.None)
+//            continue;
+
+//        if (CurrentGridX - 1 < 0 && action == Action.Left)
+//        {
+//            continue;
+//        }
+//        else if (CurrentGridX + 1 >= GrizSizeX && action == Action.Right)
+//        {
+//            continue;
+//        }
+//        else if (CurrentGridY + 1 >= GrizSizeY && action == Action.Up)
+//        {
+//            continue;
+//        }
+//        else if (CurrentGridY - 1 < 0 && action == Action.Down)
+//        {
+//            continue;
+//        }
+//        else
+//        {
+//            float value = ExplorationFunction(ref currentState, action);
+//            if (value >= max)
+//            {
+//                max = value;
+//                argMaxAction = action;
+//            }
+//        }
+//    }
+//    Debug.Log(argMaxAction);
+//    return argMaxAction;
+//}
+#endregion
+private Action ArgMaxActionExploration(ref (int, int) currentState)
     {
         if (currentState == FinalState)
             return Action.None;
@@ -160,48 +220,51 @@ public class Agent : MonoBehaviour
         Action argMaxAction = Action.None;
         float max = float.NegativeInfinity;
 
-        Action[] actions = new Action[5];
+        Action[] actions = new Action[4];
         int i = 0;
         foreach (Action action in Enum.GetValues(typeof(Action)))
         {
-            actions[i] = action;
-            i++;
+            if (action != Action.None)
+            {
+                actions[i] = action;
+                i++;
+            }
         }
         System.Random random = new System.Random();
         actions = actions.OrderBy(x => random.Next()).ToArray();
 
         foreach (Action action in actions)
         {
-            if (action == Action.None)
-                continue;
-
-            if (CurrentGridX - 1 < 0 && action == Action.Left)
+            if (action != Action.None)
             {
-                continue;
-            }
-            else if(CurrentGridX + 1 >= GrizSizeX && action == Action.Right)
-            {
-                continue;
-            }
-            else if (CurrentGridY + 1 >= GrizSizeY && action == Action.Up)
-            {
-                continue;
-            }
-            else if (CurrentGridY - 1 < 0 && action == Action.Down)
-            {
-                continue;
-            }
-            else
-            {
-                float value = ExplorationFunction(ref currentState, action);
-                if (value >= max)
+                if (CurrentGridX - 1 < 0 && action == Action.Left)
                 {
-                    max = value;
-                    argMaxAction = action;
+                    continue;
                 }
+                else if (CurrentGridX + 1 >= GrizSizeX && action == Action.Right)
+                {
+                    continue;
+                }
+                else if (CurrentGridY + 1 >= GrizSizeY && action == Action.Up)
+                {
+                    continue;
+                }
+                else if (CurrentGridY - 1 < 0 && action == Action.Down)
+                {
+                    continue;
+                }
+                else
+                {
+                    float value = StateActionPairQValue[(currentState, action)];
+                    if (value >= max)
+                    {
+                        max = value;
+                        argMaxAction = action;
+                    }
+                } 
             }
         }
-        Debug.Log(argMaxAction);
+        Debug.Log(string.Format("Next Action: {0}", argMaxAction));
         return argMaxAction;
     }
 
@@ -264,6 +327,10 @@ public class Agent : MonoBehaviour
 
     private IEnumerator WaitThenAction(float waitTime, (int,int) GridCoordinate)
     {
+        while(IsPause)
+        {
+            yield return null;
+        }
         yield return new WaitForSeconds(waitTime);
         ActionDelegatesDictonary[Q_Learning_Agent(GridCoordinate, StateRewardGrid[GridCoordinate])]();
     }
