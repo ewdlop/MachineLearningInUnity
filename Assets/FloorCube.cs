@@ -7,6 +7,7 @@ public class FloorCube : MonoBehaviour
     private Color originalColor = Color.gray;
     public Color currActionColor = Color.red;
 
+    public (int, int) position;
     private float fadeScale = 0.0f; 
     // Update is called once per frame
     void Update()

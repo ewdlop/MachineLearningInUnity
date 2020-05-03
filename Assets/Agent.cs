@@ -6,11 +6,11 @@ using UnityEngine;
 [Serializable]
 public enum Action
 {
-    None,
-    Right,
+    Up,
     Down,
     Left,
-    Up
+    Right,
+    None
 }
 [Serializable]
 public class Agent : MonoBehaviour

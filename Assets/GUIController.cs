@@ -21,6 +21,8 @@ public class GUIController : MonoBehaviour
     public Text LearningRateText { get => _LearningRateText; set => _LearningRateText = value; }
     public Text DiscountingFactorText { get => _DiscountingFactorText; set => _DiscountingFactorText = value; }
 
+    public GameObject weightDisplayPanel;
+
     public void UpdateInterationText(string newText)
     {
         IterationText.text = string.Format("Iteration: {0}", newText);
@@ -42,5 +44,15 @@ public class GUIController : MonoBehaviour
     public void ResetScene()
     {       
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void ShowWeightDisplay()
+    {
+        weightDisplayPanel.SetActive(true);
+    }
+
+    public void HideWeightDisplay()
+    {
+        weightDisplayPanel.SetActive(false);
     }
 }

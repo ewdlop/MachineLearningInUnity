@@ -50,6 +50,7 @@ public class Grid : MonoBehaviour
             {
                 Vector3 position = new Vector3(r, transform.position.y, c);
                 grid[r, c] = Instantiate(floorCube, position, Quaternion.identity) as GameObject;
+                grid[r, c].GetComponent<FloorCube>().position = (r, c);
             }          
         }
     }
