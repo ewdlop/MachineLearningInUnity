@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 1105099172098179435}
   - component: {fileID: 4023474817734961854}
   - component: {fileID: 3960145055848983454}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Goal
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -107,3 +107,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currActionColor: {r: 1, g: 0, b: 0, a: 1}
+  weightDisplay: {fileID: 0}

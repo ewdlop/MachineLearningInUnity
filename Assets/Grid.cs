@@ -21,6 +21,7 @@ public class Grid : MonoBehaviour
     public int rows = 15;
     public int columns = 15;
     private GameObject[,] grid;
+    public WeightDisplay weightDisplay;
 
     public (int, int) goalPosition;
 
@@ -49,8 +50,9 @@ public class Grid : MonoBehaviour
             for (int r = 0; r < rows; ++r)
             {
                 Vector3 position = new Vector3(r, transform.position.y, c);
-                grid[r, c] = Instantiate(floorCube, position, Quaternion.identity) as GameObject;
+                grid[r, c] = Instantiate(floorCube, position, Quaternion.identity);
                 grid[r, c].GetComponent<FloorCube>().position = (r, c);
+                grid[r, c].GetComponent<FloorCube>().weightDisplay = weightDisplay;
             }          
         }
     }

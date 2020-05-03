@@ -8,11 +8,12 @@ using UnityEngine;
 [Serializable]
 public enum Action
 {
+    None,
     Up,
     Down,
     Left,
     Right,
-    None
+
 }
 [Serializable]
 public class Agent : MonoBehaviour
@@ -70,6 +71,8 @@ public class Agent : MonoBehaviour
     public int GrizSizeX;
     public int GrizSizeY;
 
+    public float RestTime;
+
     public Dictionary<((int,int),Action),float> StateActionPairQValue;
     public Dictionary<((int,int), Action),int> StateActionPairFrequencies;
     public Dictionary<(int, int), float> StateRewardGrid;
@@ -85,8 +88,9 @@ public class Agent : MonoBehaviour
             StateActionPairQValue[(PreviousState.Value, Action.None)] = rewardSignal;
         }
 
-        if(PreviousState.HasValue)
+        if (PreviousState.HasValue)
         {
+            Debug.Log(string.Format("{0},{1},{2}", PreviousState.Value, PreviousAction.Value, PreviousReward.Value));
             ((int, int), Action) stateActionPair = (PreviousState.Value, PreviousAction.Value);
             StateActionPairFrequencies[stateActionPair]++;
             StateActionPairQValue[stateActionPair] += LearningRate *
@@ -102,6 +106,9 @@ public class Agent : MonoBehaviour
     //Page 844
     private float MaxStateActionPairQValue(ref (int, int) currentState)
     {
+        if (currentState == FinalState)
+            return StateActionPairQValue[(currentState, Action.None)];
+
         float max = float.NegativeInfinity;
 
         Action[] actions = new Action[5];
@@ -116,9 +123,6 @@ public class Agent : MonoBehaviour
 
         foreach (Action action in actions)
         {
-            if (currentState == FinalState)
-                return StateActionPairQValue[(currentState, Action.None)];
-            
             if (action == Action.None)
                 continue;
                 
@@ -126,25 +130,33 @@ public class Agent : MonoBehaviour
             {
                 continue;
             }
-            if (CurrentGridX + 1 >= GrizSizeX && action == Action.Right)
+            else if (CurrentGridX + 1 >= GrizSizeX && action == Action.Right)
             {
                 continue;
             }
-            if (CurrentGridY + 1 >= GrizSizeY && action == Action.Up)
+            else if (CurrentGridY + 1 >= GrizSizeY && action == Action.Up)
             {
                 continue;
             }
-            if (CurrentGridY - 1 < 0 && action == Action.Down)
+            else if (CurrentGridY - 1 < 0 && action == Action.Down)
             {
                 continue;
             }
-            max = Mathf.Max(StateActionPairQValue[(currentState, action)]);
+            else
+            {
+                max = Mathf.Max(StateActionPairQValue[(currentState, action)], max);
+            }
         }
+        Debug.Log(max);
         return max;
+
     }
 
     private Action ArgMaxActionExploration(ref (int, int) currentState)
     {
+        if (currentState == FinalState)
+            return Action.None;
+
         Action argMaxAction = Action.None;
         float max = float.NegativeInfinity;
 
@@ -160,9 +172,6 @@ public class Agent : MonoBehaviour
 
         foreach (Action action in actions)
         {
-            if (currentState == FinalState)
-                return Action.None;
-
             if (action == Action.None)
                 continue;
 
@@ -170,30 +179,34 @@ public class Agent : MonoBehaviour
             {
                 continue;
             }
-            if(CurrentGridX + 1 >= GrizSizeX && action == Action.Right)
+            else if(CurrentGridX + 1 >= GrizSizeX && action == Action.Right)
             {
                 continue;
             }
-            if (CurrentGridY + 1 >= GrizSizeY && action == Action.Up)
+            else if (CurrentGridY + 1 >= GrizSizeY && action == Action.Up)
             {
                 continue;
             }
-            if (CurrentGridY - 1 < 0 && action == Action.Down)
+            else if (CurrentGridY - 1 < 0 && action == Action.Down)
             {
                 continue;
             }
-            float value = ExplorationFunction(ref currentState, action);
-            if(value >= max)
+            else
             {
-                max = value;
-                argMaxAction = action;
+                float value = ExplorationFunction(ref currentState, action);
+                if (value >= max)
+                {
+                    max = value;
+                    argMaxAction = action;
+                }
             }
         }
+        Debug.Log(argMaxAction);
         return argMaxAction;
     }
 
-    //Page 842, this function is not well defined apparently
     //Give the agent the option to have the incentives to explore more?
+    //Page 842, this function is not well defined apparently 
     private float ExplorationFunction(ref (int, int) currentState, Action choice)
     {
         if(StateActionPairFrequencies[(currentState,choice)] < MimumumStateActionPairFrequencies)
@@ -207,42 +220,42 @@ public class Agent : MonoBehaviour
     {
         transform.position -= new Vector3(1f, 0f, 0f);
         CurrentGridX--;
-        WaitThenActionCoroutine = StartCoroutine(WaitThenAction(0.01f, (CurrentGridX, CurrentGridY)));
+        WaitThenActionCoroutine = StartCoroutine(WaitThenAction(RestTime, (CurrentGridX, CurrentGridY)));
     }
 
     private void Right()
     {
         transform.position += new Vector3(1f, 0f, 0f);
         CurrentGridX++;
-        WaitThenActionCoroutine = StartCoroutine(WaitThenAction(0.01f, (CurrentGridX, CurrentGridY)));
+        WaitThenActionCoroutine = StartCoroutine(WaitThenAction(RestTime, (CurrentGridX, CurrentGridY)));
     }
 
     private void Up()
     {
         transform.position += new Vector3(0f, 0f, 1f);
         CurrentGridY++;
-        WaitThenActionCoroutine = StartCoroutine(WaitThenAction(0.01f, (CurrentGridX, CurrentGridY)));
+        WaitThenActionCoroutine = StartCoroutine(WaitThenAction(RestTime, (CurrentGridX, CurrentGridY)));
     }
 
     private void Down()
     {
         transform.position -= new Vector3(0f, 0f, 1f);
         CurrentGridY--;
-        WaitThenActionCoroutine = StartCoroutine(WaitThenAction(0.01f, (CurrentGridX, CurrentGridY)));
+        WaitThenActionCoroutine = StartCoroutine(WaitThenAction(RestTime, (CurrentGridX, CurrentGridY)));
     }
 
     private void None()
     {
         ResetAgentToStart();
         UpdateIteration();
-        WaitThenActionCoroutine = StartCoroutine(WaitThenAction(0.01f, StartState));
+        WaitThenActionCoroutine = StartCoroutine(WaitThenAction(RestTime, (CurrentGridX, CurrentGridY)));
     }
 
     private void ResetAgentToStart()
     {
-        PreviousAction = null;
-        PreviousReward = null;
-        PreviousState = null;
+        //PreviousAction = null;
+        //PreviousReward = null;
+        //PreviousState = null;
         transform.position = new Vector3(StartState.Item1, 1f, StartState.Item2);
         CurrentGridX = StartState.Item1;
         CurrentGridY = StartState.Item2;
@@ -295,15 +308,15 @@ public class Agent : MonoBehaviour
                 }
                 if (i == 0 || j == 0 || i == GrizSizeX - 1 || j == GrizSizeY - 1)
                 {
-                    StateRewardGrid[(i, j)] = 5f;
+                    StateRewardGrid[(i, j)] = -1f;
                 }
                 else
                 {
-                    StateRewardGrid[(i, j)] = -10f;
+                    StateRewardGrid[(i, j)] = 0f;
                 }
-            }
+            } 
         }
-        StateRewardGrid[FinalState] = 500f;
+        StateRewardGrid[FinalState] = 1f;
     }
 
     private void Update()
@@ -314,7 +327,7 @@ public class Agent : MonoBehaviour
     public void StartExploring()
     {
         UpdateIteration();
-        WaitThenActionCoroutine = StartCoroutine(WaitThenAction(0.1f, StartState));
+        WaitThenActionCoroutine = StartCoroutine(WaitThenAction(1f, StartState));
     }
 
     public void Stop()
@@ -336,3 +349,7 @@ public class Agent : MonoBehaviour
     }
     #endregion
 }
+
+
+//If terminal state( not finalstate), reward signal for reach the terminal state is 500, 
+//Q(finalstate,None) = 500
