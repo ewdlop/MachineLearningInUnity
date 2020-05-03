@@ -8,12 +8,11 @@ using UnityEngine;
 [Serializable]
 public enum Action
 {
-    None,
     Up,
     Down,
     Left,
     Right,
-
+    None
 }
 [Serializable]
 public class Agent : MonoBehaviour
@@ -50,6 +49,10 @@ public class Agent : MonoBehaviour
     private Coroutine _waitThenActionCoroutine;
     [SerializeField]
     private bool _isPause;
+    [SerializeField]
+    [Range(0.001f, 30f)]
+    private float _restTime;
+
     public int Step { get => _step; set => _step = value; }
     public int Iteration { get => _iteration; set => _iteration = value; }
     public int CurrentGridX { get => _currentGridX; set => _currentGridX = value; }
@@ -64,6 +67,7 @@ public class Agent : MonoBehaviour
     public float EstimatedBestPossibleRewardValue { get => _estimatedBestPossibleRewardValue; set => _estimatedBestPossibleRewardValue = value; }
     public Coroutine WaitThenActionCoroutine { get => _waitThenActionCoroutine; set => _waitThenActionCoroutine = value; }
     public bool IsPause { get => _isPause; set => _isPause = value; }
+    public float RestTime { get => _restTime; set => _restTime = value; }
 
     public (int,int) StartState;
     public (int,int) FinalState = (7,9);
@@ -73,8 +77,6 @@ public class Agent : MonoBehaviour
     
     public int GrizSizeX;
     public int GrizSizeY;
-
-    public float RestTime;
 
     public Dictionary<((int,int),Action),float> StateActionPairQValue;
     public Dictionary<((int,int), Action),int> StateActionPairFrequencies;
@@ -115,20 +117,7 @@ public class Agent : MonoBehaviour
 
         float max = float.NegativeInfinity;
 
-        Action[] actions = new Action[4];
-        int i = 0;
-        foreach (Action action in Enum.GetValues(typeof(Action)))
-        {
-            if(action != Action.None)
-            {
-                actions[i] = action;
-                i++;
-            }
-        }
-        System.Random random = new System.Random();
-        actions = actions.OrderBy(_ => random.Next()).ToArray();
-
-        foreach (Action action in actions)
+        foreach (Action action in SuffledActions())
         {
             if (CurrentGridX - 1 < 0 && action == Action.Left)
             {
@@ -151,9 +140,26 @@ public class Agent : MonoBehaviour
                 max = Mathf.Max(StateActionPairQValue[(currentState, action)], max);
             }
         }
-        Debug.Log(string.Format("Q-value: {0}",max));
+        Debug.Log(string.Format("Q-value: {0}", max));
         return max;
 
+    }
+
+    private static Action[] SuffledActions()
+    {
+        Action[] actions = new Action[4];
+        int i = 0;
+        foreach (Action action in Enum.GetValues(typeof(Action)))
+        {
+            if (action != Action.None)
+            {
+                actions[i] = action;
+                i++;
+            }
+        }
+        System.Random random = new System.Random();
+        actions = actions.OrderBy(_ => random.Next()).ToArray();
+        return actions;
     }
     #region old
     //private Action ArgMaxActionExploration(ref (int, int) currentState)
@@ -168,51 +174,51 @@ public class Agent : MonoBehaviour
     //    int i = 0;
     //    foreach (Action action in Enum.GetValues(typeof(Action)))
     //    {
-            //if(action != Action.None)
-            //{
-            //    actions[i] = action;
-            //    i++;
-            //}
-//    }
-//    System.Random random = new System.Random();
-//    actions = actions.OrderBy(x => random.Next()).ToArray();
+    //if(action != Action.None)
+    //{
+    //    actions[i] = action;
+    //    i++;
+    //}
+    //    }
+    //    System.Random random = new System.Random();
+    //    actions = actions.OrderBy(x => random.Next()).ToArray();
 
-//    foreach (Action action in actions)
-//    {
-//        if (action == Action.None)
-//            continue;
+    //    foreach (Action action in actions)
+    //    {
+    //        if (action == Action.None)
+    //            continue;
 
-//        if (CurrentGridX - 1 < 0 && action == Action.Left)
-//        {
-//            continue;
-//        }
-//        else if (CurrentGridX + 1 >= GrizSizeX && action == Action.Right)
-//        {
-//            continue;
-//        }
-//        else if (CurrentGridY + 1 >= GrizSizeY && action == Action.Up)
-//        {
-//            continue;
-//        }
-//        else if (CurrentGridY - 1 < 0 && action == Action.Down)
-//        {
-//            continue;
-//        }
-//        else
-//        {
-//            float value = ExplorationFunction(ref currentState, action);
-//            if (value >= max)
-//            {
-//                max = value;
-//                argMaxAction = action;
-//            }
-//        }
-//    }
-//    Debug.Log(argMaxAction);
-//    return argMaxAction;
-//}
-#endregion
-private Action ArgMaxActionExploration(ref (int, int) currentState)
+    //        if (CurrentGridX - 1 < 0 && action == Action.Left)
+    //        {
+    //            continue;
+    //        }
+    //        else if (CurrentGridX + 1 >= GrizSizeX && action == Action.Right)
+    //        {
+    //            continue;
+    //        }
+    //        else if (CurrentGridY + 1 >= GrizSizeY && action == Action.Up)
+    //        {
+    //            continue;
+    //        }
+    //        else if (CurrentGridY - 1 < 0 && action == Action.Down)
+    //        {
+    //            continue;
+    //        }
+    //        else
+    //        {
+    //            float value = ExplorationFunction(ref currentState, action);
+    //            if (value >= max)
+    //            {
+    //                max = value;
+    //                argMaxAction = action;
+    //            }
+    //        }
+    //    }
+    //    Debug.Log(argMaxAction);
+    //    return argMaxAction;
+    //}
+    #endregion
+    private Action ArgMaxActionExploration(ref (int, int) currentState)
     {
         if (currentState == FinalState)
             return Action.None;
@@ -220,20 +226,8 @@ private Action ArgMaxActionExploration(ref (int, int) currentState)
         Action argMaxAction = Action.None;
         float max = float.NegativeInfinity;
 
-        Action[] actions = new Action[4];
-        int i = 0;
-        foreach (Action action in Enum.GetValues(typeof(Action)))
-        {
-            if (action != Action.None)
-            {
-                actions[i] = action;
-                i++;
-            }
-        }
-        System.Random random = new System.Random();
-        actions = actions.OrderBy(x => random.Next()).ToArray();
 
-        foreach (Action action in actions)
+        foreach (Action action in SuffledActions())
         {
             if (action != Action.None)
             {
@@ -364,18 +358,18 @@ private Action ArgMaxActionExploration(ref (int, int) currentState)
         StateActionPairFrequencies = new Dictionary<((int, int), Action), int>();
         StateRewardGrid = new Dictionary<(int, int), float>();
 
-        for (int i = 0; i < GrizSizeX; i++)
+        for (int i = 0; i <= GrizSizeX; i++)
         {
-            for (int j = 0; j < GrizSizeY; j++)
+            for (int j = 0; j <= GrizSizeY; j++)
             {
                 foreach (Action action in Enum.GetValues(typeof(Action)))
                 {
                     StateActionPairQValue[((i, j), action)] = 0;
                     StateActionPairFrequencies[((i, j), action)] = 0;
                 }
-                if (i == 0 || j == 0 || i == GrizSizeX - 1 || j == GrizSizeY - 1)
+                if (i == 0 || j == 0 || i == GrizSizeX || j == GrizSizeY)
                 {
-                    StateRewardGrid[(i, j)] = -1f;
+                    StateRewardGrid[(i, j)] = -10f;
                 }
                 else
                 {

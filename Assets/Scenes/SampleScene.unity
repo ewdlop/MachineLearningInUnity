@@ -412,11 +412,11 @@ MonoBehaviour:
   _mimumumStateActionPairFrequencies: 0
   _estimatedBestPossibleRewardValue: 0
   _isPause: 0
+  _restTime: 0.001
   StartX: 2
   StartY: 3
   GrizSizeX: 10
   GrizSizeY: 10
-  RestTime: 1
 --- !u!136 &130691566
 CapsuleCollider:
   m_ObjectHideFlags: 0
