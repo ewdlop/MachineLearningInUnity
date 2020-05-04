@@ -54,6 +54,8 @@ public class Agent : MonoBehaviour
     private float _restTime;
     [SerializeField]
     private GameObject _roadBlock;
+    [SerializeField]
+    private GameObject _Goodies;
 
     public int Step { get => _step; set => _step = value; }
     public int Iteration { get => _iteration; set => _iteration = value; }
@@ -71,6 +73,7 @@ public class Agent : MonoBehaviour
     public bool IsPause { get => _isPause; set => _isPause = value; }
     public float RestTime { get => _restTime; set => _restTime = value; }
     public GameObject RoadBlock { get => _roadBlock; set => _roadBlock = value; }
+    public GameObject Goodies { get => _Goodies; set => _Goodies = value; }
 
     public (int,int) StartState;
     public (int,int) FinalState = (7,9);
@@ -315,7 +318,7 @@ public class Agent : MonoBehaviour
                 }
             }
         }
-        StateRewardGrid[FinalState] = 1f;
+        StateRewardGrid[FinalState] = 100f;
 
         for (int i = 0; i < GrizSizeX; i++)
         {
@@ -324,25 +327,33 @@ public class Agent : MonoBehaviour
                 if (i != StartState.Item1 && i != FinalState.Item1 && j != StartState.Item2 && j != FinalState.Item2)
                 {
                     float random = UnityEngine.Random.Range(0f, 1f);
-                    if (random <= 0.1f)
+                    if (random <= 0.3f)
                     {
-                        Instantiate(RoadBlock, new Vector3(i, 0.5f, j), Quaternion.identity);
-                        if (i + 1 < GrizSizeX)
+                        if (random <= 0.2f)
                         {
-                            StateActionPairQValue[((i + 1, j), Action.Left)] = float.NegativeInfinity;
+                            Instantiate(RoadBlock, new Vector3(i, 0.5f, j), Quaternion.identity);
+                            if (i + 1 < GrizSizeX)
+                            {
+                                StateActionPairQValue[((i + 1, j), Action.Left)] = float.NegativeInfinity;
+                            }
+                            if (i - 1 >= 0)
+                            {
+                                StateActionPairQValue[((i - 1, j), Action.Right)] = float.NegativeInfinity;
+                            }
+                            if (j + 1 < GrizSizeY)
+                            {
+                                StateActionPairQValue[((i, j + 1), Action.Down)] = float.NegativeInfinity;
+                            }
+                            if (j - 1 >= 0)
+                            {
+                                StateActionPairQValue[((i, j - 1), Action.Up)] = float.NegativeInfinity;
+                            }
                         }
-                        if (i - 1 >= 0)
-                        {
-                            StateActionPairQValue[((i - 1, j), Action.Right)] = float.NegativeInfinity;
-                        }
-                        if (j + 1 < GrizSizeY)
-                        {
-                            StateActionPairQValue[((i, j + 1), Action.Down)] = float.NegativeInfinity;
-                        }
-                        if (j - 1 >= 0)
-                        {
-                            StateActionPairQValue[((i, j - 1), Action.Up)] = float.NegativeInfinity;
-                        }
+                        //else
+                        //{
+                        //    Instantiate(Goodies, new Vector3(i, 0.5f, j), Quaternion.identity);
+                        //    StateRewardGrid[(i, j)] = 5f;
+                        //}
                     }
                 }
                 if (i == 0 || j == 0 || i == GrizSizeX-1 || j == GrizSizeY-1)

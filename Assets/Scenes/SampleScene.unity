@@ -492,6 +492,8 @@ MonoBehaviour:
   _restTime: 0.001
   _roadBlock: {fileID: 7164133369638840951, guid: c3e6f6a40de73024ebb24ef891eee43b,
     type: 3}
+  _Goodies: {fileID: 3851352728784322036, guid: ed3c67af0f15b704cb15ab83f8f1cf04,
+    type: 3}
   StartX: 2
   StartY: 3
   GrizSizeX: 15
@@ -2008,7 +2010,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 0.046875, y: 0.171875, z: 0.0390625, w: -0.05859375}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
