@@ -52,6 +52,8 @@ public class Agent : MonoBehaviour
     [SerializeField]
     [Range(0.001f, 30f)]
     private float _restTime;
+    [SerializeField]
+    private GameObject _roadBlock;
 
     public int Step { get => _step; set => _step = value; }
     public int Iteration { get => _iteration; set => _iteration = value; }
@@ -68,6 +70,7 @@ public class Agent : MonoBehaviour
     public Coroutine WaitThenActionCoroutine { get => _waitThenActionCoroutine; set => _waitThenActionCoroutine = value; }
     public bool IsPause { get => _isPause; set => _isPause = value; }
     public float RestTime { get => _restTime; set => _restTime = value; }
+    public GameObject RoadBlock { get => _roadBlock; set => _roadBlock = value; }
 
     public (int,int) StartState;
     public (int,int) FinalState = (7,9);
@@ -95,10 +98,10 @@ public class Agent : MonoBehaviour
 
         if (PreviousState.HasValue)
         {
-            Debug.Log(string.Format("{0},{1},{2}", PreviousState.Value, PreviousAction.Value, PreviousReward.Value));
             ((int, int), Action) stateActionPair = (PreviousState.Value, PreviousAction.Value);
+            
             //StateActionPairFrequencies[stateActionPair]++;
-            //StateActionPairQValue[stateActionPair] += LearningRate * (StateActionPairFrequencies[stateActionPair]) * (PreviousReward.Value + 
+            //StateActionPairQValue[stateActionPair] += LearningRate * (StateActionPairFrequencies[stateActionPair]) * (PreviousReward.Value +
             //    DiscountingFactor * MaxStateActionPairQValue(ref currentState) - StateActionPairQValue[stateActionPair]);
 
             StateActionPairQValue[stateActionPair] += LearningRate * (PreviousReward.Value + (DiscountingFactor * MaxStateActionPairQValue(ref currentState)) - StateActionPairQValue[stateActionPair]);
@@ -119,30 +122,9 @@ public class Agent : MonoBehaviour
 
         foreach (Action action in SuffledActions())
         {
-            if (CurrentGridX - 1 < 0 && action == Action.Left)
-            {
-                continue;
-            }
-            else if (CurrentGridX + 1 >= GrizSizeX && action == Action.Right)
-            {
-                continue;
-            }
-            else if (CurrentGridY + 1 >= GrizSizeY && action == Action.Up)
-            {
-                continue;
-            }
-            else if (CurrentGridY - 1 < 0 && action == Action.Down)
-            {
-                continue;
-            }
-            else
-            {
-                max = Mathf.Max(StateActionPairQValue[(currentState, action)], max);
-            }
+            max = Mathf.Max(StateActionPairQValue[(currentState, action)], max);
         }
-        Debug.Log(string.Format("Q-value: {0}", max));
         return max;
-
     }
 
     private static Action[] SuffledActions()
@@ -161,7 +143,7 @@ public class Agent : MonoBehaviour
         actions = actions.OrderBy(_ => random.Next()).ToArray();
         return actions;
     }
-    #region old
+    #region not working
     //private Action ArgMaxActionExploration(ref (int, int) currentState)
     //{
     //    if (currentState == FinalState)
@@ -170,20 +152,7 @@ public class Agent : MonoBehaviour
     //    Action argMaxAction = Action.None;
     //    float max = float.NegativeInfinity;
 
-    //    Action[] actions = new Action[5];
-    //    int i = 0;
-    //    foreach (Action action in Enum.GetValues(typeof(Action)))
-    //    {
-    //if(action != Action.None)
-    //{
-    //    actions[i] = action;
-    //    i++;
-    //}
-    //    }
-    //    System.Random random = new System.Random();
-    //    actions = actions.OrderBy(x => random.Next()).ToArray();
-
-    //    foreach (Action action in actions)
+    //    foreach (Action action in SuffledActions())
     //    {
     //        if (action == Action.None)
     //            continue;
@@ -214,7 +183,6 @@ public class Agent : MonoBehaviour
     //            }
     //        }
     //    }
-    //    Debug.Log(argMaxAction);
     //    return argMaxAction;
     //}
     #endregion
@@ -226,39 +194,15 @@ public class Agent : MonoBehaviour
         Action argMaxAction = Action.None;
         float max = float.NegativeInfinity;
 
-
         foreach (Action action in SuffledActions())
         {
-            if (action != Action.None)
+            float value = StateActionPairQValue[(currentState, action)];
+            if (value >= max)
             {
-                if (CurrentGridX - 1 < 0 && action == Action.Left)
-                {
-                    continue;
-                }
-                else if (CurrentGridX + 1 >= GrizSizeX && action == Action.Right)
-                {
-                    continue;
-                }
-                else if (CurrentGridY + 1 >= GrizSizeY && action == Action.Up)
-                {
-                    continue;
-                }
-                else if (CurrentGridY - 1 < 0 && action == Action.Down)
-                {
-                    continue;
-                }
-                else
-                {
-                    float value = StateActionPairQValue[(currentState, action)];
-                    if (value >= max)
-                    {
-                        max = value;
-                        argMaxAction = action;
-                    }
-                } 
+                max = value;
+                argMaxAction = action;
             }
         }
-        Debug.Log(string.Format("Next Action: {0}", argMaxAction));
         return argMaxAction;
     }
 
@@ -310,9 +254,6 @@ public class Agent : MonoBehaviour
 
     private void ResetAgentToStart()
     {
-        //PreviousAction = null;
-        //PreviousReward = null;
-        //PreviousState = null;
         transform.position = new Vector3(StartState.Item1, 1f, StartState.Item2);
         CurrentGridX = StartState.Item1;
         CurrentGridY = StartState.Item2;
@@ -321,6 +262,7 @@ public class Agent : MonoBehaviour
 
     private IEnumerator WaitThenAction(float waitTime, (int,int) GridCoordinate)
     {
+        //For pausing the agent
         while(IsPause)
         {
             yield return null;
@@ -334,12 +276,15 @@ public class Agent : MonoBehaviour
     private void Start()
     {
         FinalState = Grid.instance.goalPosition;
+        //Function pointer in C#
         ActionDelegatesDictonary = new Dictionary<Action, System.Action>();
         ActionDelegatesDictonary[Action.Left] = Left;
         ActionDelegatesDictonary[Action.Right] = Right;
         ActionDelegatesDictonary[Action.Up] = Up;
         ActionDelegatesDictonary[Action.Down] = Down;
         ActionDelegatesDictonary[Action.None] = None;
+        StartX = UnityEngine.Random.Range(0, GrizSizeX);
+        StartY = UnityEngine.Random.Range(0, GrizSizeY);
         Initialized();
     }
 
@@ -358,28 +303,100 @@ public class Agent : MonoBehaviour
         StateActionPairFrequencies = new Dictionary<((int, int), Action), int>();
         StateRewardGrid = new Dictionary<(int, int), float>();
 
-        for (int i = 0; i <= GrizSizeX; i++)
+        for (int i = 0; i < GrizSizeX; i++)
         {
-            for (int j = 0; j <= GrizSizeY; j++)
+            for (int j = 0; j < GrizSizeY; j++)
             {
                 foreach (Action action in Enum.GetValues(typeof(Action)))
                 {
                     StateActionPairQValue[((i, j), action)] = 0;
-                    StateActionPairFrequencies[((i, j), action)] = 0;
+                    //StateActionPairFrequencies[((i, j), action)] = 0;
+                    StateRewardGrid[(i,j)] = 0f;
                 }
-                if (i == 0 || j == 0 || i == GrizSizeX || j == GrizSizeY)
+            }
+        }
+        StateRewardGrid[FinalState] = 1f;
+
+        for (int i = 0; i < GrizSizeX; i++)
+        {
+            for (int j = 0; j < GrizSizeY; j++)
+            {
+                if (i != StartState.Item1 && i != FinalState.Item1 && j != StartState.Item2 && j != FinalState.Item2)
                 {
-                    StateRewardGrid[(i, j)] = -10f;
+                    float random = UnityEngine.Random.Range(0f, 1f);
+                    if (random <= 0.1f)
+                    {
+                        Instantiate(RoadBlock, new Vector3(i, 0.5f, j), Quaternion.identity);
+                        if (i + 1 < GrizSizeX)
+                        {
+                            StateActionPairQValue[((i + 1, j), Action.Left)] = float.NegativeInfinity;
+                        }
+                        if (i - 1 >= 0)
+                        {
+                            StateActionPairQValue[((i - 1, j), Action.Right)] = float.NegativeInfinity;
+                        }
+                        if (j + 1 < GrizSizeY)
+                        {
+                            StateActionPairQValue[((i, j + 1), Action.Down)] = float.NegativeInfinity;
+                        }
+                        if (j - 1 >= 0)
+                        {
+                            StateActionPairQValue[((i, j - 1), Action.Up)] = float.NegativeInfinity;
+                        }
+                    }
                 }
-                else
+                if (i == 0 || j == 0 || i == GrizSizeX-1 || j == GrizSizeY-1)
                 {
                     StateRewardGrid[(i, j)] = 0f;
+                    //Prevent the agent go out of bound
+                    if(i == 0)
+                    {
+                        StateActionPairQValue[((i, j), Action.Left)] = float.NegativeInfinity;
+                    }
+                    if(j == 0)
+                    {
+                        StateActionPairQValue[((i, j), Action.Down)] = float.NegativeInfinity;
+                    }
+                    if(i == GrizSizeX-1)
+                    {
+                        StateActionPairQValue[((i, j), Action.Right)] = float.NegativeInfinity;
+                    }
+                    if(j == GrizSizeY-1)
+                    {
+                        StateActionPairQValue[((i, j), Action.Up)] = float.NegativeInfinity;
+                    }
                 }
             } 
         }
-        StateRewardGrid[FinalState] = 1f;
     }
+    private void ReInitialized()
+    {
+        PreviousAction = null;
+        PreviousReward = null;
+        PreviousState = null;
+        Step = 0;
+        Iteration = 0;
+        transform.position = new Vector3(StartX, 1f, StartY);
+        StartState = (StartX, StartY);
+        CurrentGridX = StartState.Item1;
+        CurrentGridY = StartState.Item2;
+        StateActionPairFrequencies = new Dictionary<((int, int), Action), int>();;
 
+        for (int i = 0; i < GrizSizeX; i++)
+        {
+            for (int j = 0; j < GrizSizeY; j++)
+            {
+                foreach (Action action in Enum.GetValues(typeof(Action)))
+                {
+                    if(!(StateActionPairQValue.ContainsKey(((i, j), action)) && StateActionPairQValue[((i, j), action)] == float.NegativeInfinity))
+                    {
+                        StateActionPairQValue[((i, j), action)] = 0;
+                        //StateActionPairFrequencies[((i, j), action)] = 0;
+                    }
+                }
+            }
+        }
+    }
     private void Update()
     {
         Grid.instance.UpdateColor(CurrentGridX, CurrentGridY);
@@ -393,7 +410,7 @@ public class Agent : MonoBehaviour
 
     public void Stop()
     {
-        Initialized();
+        ReInitialized();
         StopCoroutine(WaitThenActionCoroutine);
     }
 
@@ -410,7 +427,3 @@ public class Agent : MonoBehaviour
     }
     #endregion
 }
-
-
-//If terminal state( not finalstate), reward signal for reach the terminal state is 500, 
-//Q(finalstate,None) = 500

@@ -11,7 +11,7 @@ public class FloorCube : MonoBehaviour
     private float fadeScale = 0.0f;
     private bool IsMouseOver;
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
         if (!IsMouseOver)
         {
