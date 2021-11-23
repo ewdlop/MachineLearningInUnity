@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -27,26 +25,26 @@ public class GUIController : MonoBehaviour
 
     public void UpdateInterationText(string newText)
     {
-        IterationText.text = string.Format("Iteration: {0}", newText);
+        IterationText.text = $"Iteration: {newText}";
     }
 
     public void UpdateStepText(string newText)
     {
-        StepText.text = string.Format("Step: {0}", newText);
+        StepText.text = $"Step: {newText}";
     }
     public void UpdateLearningRateValue(float newValue)
     {
-        LearningRateText.text = string.Format("LearningRate: {0}", newValue);
+        LearningRateText.text = $"LearningRate: {newValue}";
     }
 
     public void UpdateDiscountingFactorValue(float newValue)
     {
-        DiscountingFactorText.text = string.Format("Discounting Factor: {0}", newValue);
+        DiscountingFactorText.text = $"Discounting Factor: {newValue}";
     }
 
     public void UpdateStepTimeValue(float newValue)
     {
-        StepTimeText.text = string.Format("Step Time: {0}", newValue);
+        StepTimeText.text = $"Step Time: {newValue}";
     }
     public void ResetScene()
     {       

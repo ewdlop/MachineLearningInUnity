@@ -486,8 +486,8 @@ MonoBehaviour:
   _gUIController: {fileID: 1881376384}
   _learningRate: 1
   _discountingFactor: 0.5
-  _mimumumStateActionPairFrequencies: 0
-  _estimatedBestPossibleRewardValue: 0
+  _mimumumStateActionPairFrequencies: 1
+  _estimatedBestPossibleRewardValue: 10
   _isPause: 0
   _restTime: 0.001
   _roadBlock: {fileID: 7164133369638840951, guid: c3e6f6a40de73024ebb24ef891eee43b,
@@ -2010,7 +2010,8 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0.046875, y: 0.171875, z: 0.0390625, w: -0.05859375}
+  m_BoundingSphereOverride: {x: -2.3404263e-24, y: 2.3937171e-21, z: -3.0590932e+31,
+    w: NaN}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0

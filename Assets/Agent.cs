@@ -84,10 +84,10 @@ public class Agent : MonoBehaviour
     public int GrizSizeX;
     public int GrizSizeY;
 
-    public Dictionary<((int,int),Action),float> StateActionPairQValue;
-    public Dictionary<((int,int), Action),int> StateActionPairFrequencies;
-    public Dictionary<(int, int), float> StateRewardGrid;
-    public Dictionary<Action, System.Action> ActionDelegatesDictonary;
+    public Dictionary<((int,int),Action),float> StateActionPairQValue { get; set; }
+    //public Dictionary<((int,int), Action),int> StateActionPairFrequencies;
+    public Dictionary<(int, int), float> StateRewardGrid { get; set; }
+    public Dictionary<Action, System.Action> ActionDelegatesDictonary { get; set; }
     #endregion
 
     #region  Q_Learning_Agent
@@ -103,6 +103,7 @@ public class Agent : MonoBehaviour
         {
             ((int, int), Action) stateActionPair = (PreviousState.Value, PreviousAction.Value);
             
+            //Had issue
             //StateActionPairFrequencies[stateActionPair]++;
             //StateActionPairQValue[stateActionPair] += LearningRate * (StateActionPairFrequencies[stateActionPair]) * (PreviousReward.Value +
             //    DiscountingFactor * MaxStateActionPairQValue(ref currentState) - StateActionPairQValue[stateActionPair]);
@@ -143,10 +144,9 @@ public class Agent : MonoBehaviour
             }
         }
         System.Random random = new System.Random();
-        actions = actions.OrderBy(_ => random.Next()).ToArray();
-        return actions;
+        return actions.OrderBy(_ => random.Next()).ToArray();
     }
-    #region not working
+    #region Conflicts with the wall check and out of bound check
     //private Action ArgMaxActionExploration(ref (int, int) currentState)
     //{
     //    if (currentState == FinalState)
@@ -188,6 +188,19 @@ public class Agent : MonoBehaviour
     //    }
     //    return argMaxAction;
     //}
+
+    //Give the agent the option to have the incentives to explore more?
+    //Page 842, this function is not well defined apparently
+
+    //private float ExplorationFunction(ref (int, int) currentState, Action choice)
+    //{
+    //    if (StateActionPairFrequencies[(currentState, choice)] < MimumumStateActionPairFrequencies)
+    //    {
+    //        return EstimatedBestPossibleRewardValue;
+    //    }
+    //    return StateActionPairQValue[(currentState, choice)];
+    //}
+
     #endregion
     private Action ArgMaxActionExploration(ref (int, int) currentState)
     {
@@ -208,18 +221,6 @@ public class Agent : MonoBehaviour
         }
         return argMaxAction;
     }
-
-    //Give the agent the option to have the incentives to explore more?
-    //Page 842, this function is not well defined apparently 
-    private float ExplorationFunction(ref (int, int) currentState, Action choice)
-    {
-        if(StateActionPairFrequencies[(currentState,choice)] < MimumumStateActionPairFrequencies)
-        {
-            return EstimatedBestPossibleRewardValue;
-        }
-        return StateActionPairQValue[(currentState, choice)];
-    }
-
     private void Left()
     {
         transform.position -= new Vector3(1f, 0f, 0f);
@@ -303,7 +304,7 @@ public class Agent : MonoBehaviour
         CurrentGridX = StartState.Item1;
         CurrentGridY = StartState.Item2;
         StateActionPairQValue = new Dictionary<((int, int), Action), float>();
-        StateActionPairFrequencies = new Dictionary<((int, int), Action), int>();
+        //StateActionPairFrequencies = new Dictionary<((int, int), Action), int>();
         StateRewardGrid = new Dictionary<(int, int), float>();
 
         for (int i = 0; i < GrizSizeX; i++)
@@ -314,8 +315,8 @@ public class Agent : MonoBehaviour
                 {
                     StateActionPairQValue[((i, j), action)] = 0;
                     //StateActionPairFrequencies[((i, j), action)] = 0;
-                    StateRewardGrid[(i,j)] = 0f;
                 }
+                StateRewardGrid[(i, j)] = 0f;
             }
         }
         StateRewardGrid[FinalState] = 100f;
@@ -391,7 +392,7 @@ public class Agent : MonoBehaviour
         StartState = (StartX, StartY);
         CurrentGridX = StartState.Item1;
         CurrentGridY = StartState.Item2;
-        StateActionPairFrequencies = new Dictionary<((int, int), Action), int>();;
+        //StateActionPairFrequencies = new Dictionary<((int, int), Action), int>();;
 
         for (int i = 0; i < GrizSizeX; i++)
         {

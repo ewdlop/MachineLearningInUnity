@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Grid : MonoBehaviour
 {
@@ -35,10 +33,9 @@ public class Grid : MonoBehaviour
                 Gizmos.color = new Color(0.5f, 0.5f, 0.5f, 0.5f); // Gray
                 Vector3 position = new Vector3(c, transform.position.y, r);
                 Gizmos.DrawCube(position, new Vector3(1, 1, 1));
-            }          
+            }
         }
- 
-    }
+     }
 
     private void Start()
     {
@@ -53,7 +50,7 @@ public class Grid : MonoBehaviour
                 grid[r, c] = Instantiate(floorCube, position, Quaternion.identity);
                 grid[r, c].GetComponent<FloorCube>().position = (r, c);
                 grid[r, c].GetComponent<FloorCube>().weightDisplay = weightDisplay;
-            }          
+            }
         }
     }
 

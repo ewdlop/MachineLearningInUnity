@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class FloorCube : MonoBehaviour
 {
@@ -8,9 +6,9 @@ public class FloorCube : MonoBehaviour
     public Color currActionColor = Color.red;
     public WeightDisplay weightDisplay;
     public (int, int) position;
-    private float fadeScale = 0.0f;
+    private float fadeScale;
     private bool IsMouseOver;
-    // Update is called once per frame
+
     private void Update()
     {
         if (!IsMouseOver)
@@ -20,7 +18,6 @@ public class FloorCube : MonoBehaviour
         }
     }
 
-    // Sets the time it takes to fade the floor cube back to its original color
     public void SetFadeScale(float time)
     {
         fadeScale = time;
